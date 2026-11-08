@@ -20,3 +20,6 @@ vim.opt.splitbelow = true
 
 -- Transparencia del menú de autocompletado
 vim.opt.pumblend = 10
+
+-- Copiar al portapapeles
+vim.opt.clipboard = "unnamedplus"
