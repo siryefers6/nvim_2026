@@ -1,0 +1,50 @@
+{
+    "Jinja If": {
+        "prefix": "jif",
+        "body": [
+            "{% if ${1:condition} %}",
+            "    ${2:content}",
+            "{% endif %}"
+        ],
+        "description": "Jinja2 if"
+    },
+    "Jinja For": {
+        "prefix": "jfor",
+        "body": [
+            "{% for ${1:item} in ${2:items} %}",
+            "    ${3:content}",
+            "{% endfor %}"
+        ],
+        "description": "Jinja2 for"
+    },
+    "Jinja Variable": {
+        "prefix": "jvar",
+        "body": [
+            "{{ ${1:variable} }}"
+        ],
+        "description": "Mostrar variable"
+    },
+    "Jinja Block": {
+        "prefix": "jblock",
+        "body": [
+            "{% block ${1:content} %}",
+            "    ${2:content}",
+            "{% endblock %}"
+        ],
+        "description": "Bloque Jinja2"
+    },
+    "Jinja Include": {
+        "prefix": "jinclude",
+        "body": [
+            "{% include '${1:partial.html}' %}"
+        ],
+        "description": "Incluir plantilla"
+    },
+    "Jinja Set": {
+        "prefix": "jset",
+        "body": [
+            "{% set ${1:name} = ${2:value} %}"
+        ],
+        "description": "Definir variable"
+    }
+}
