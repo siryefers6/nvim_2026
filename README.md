@@ -1,4 +1,252 @@
-# Neovim + LazyVim — Instalación y dependencias
+# Neovim + LazyVim + configuración tmux y bashrc — Instalación y dependencias
+
+## 0. Configuraciones bash y tmux para linux Debian y Termux
+
+#### 0.1 .bashrc Debian
+
+```bash
+# ~/.bashrc limpio y personalizado
+
+# Colores para el prompt
+RED='\[\033[0;31m\]'
+GREEN='\[\033[0;32m\]'
+LIGHT_BLUE='\[\033[1;34m\]'
+YELLOW='\[\033[0;33m\]'
+CYAN='\[\033[0;36m\]'
+RESET='\[\033[0m\]'
+
+# Función para mostrar la rama actual de Git (si está en un repo)
+parse_git_branch() {
+    git branch 2>/dev/null | grep '*' | sed 's/* //'
+}
+
+# Prompt colorido con fecha, usuario, ruta y rama git
+PS1="${YELLOW}[\$(date +'%Y-%m-%d %H:%M:%S')]${RESET} ${GREEN}\u${RESET}@${LIGHT_BLUE}\h${RESET}: ${CYAN}\w${RESET}\n(\$(parse_git_branch))-> "
+
+# Alias básicos
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias ll='ls -la'
+alias cls='clear'
+
+# Editor de texto por defecto
+export EDITOR=vim
+
+# Modo vi en línea de comandos
+set -o vi
+
+# Autocompletado por historial (búsqueda incremental con flechas)
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+
+# Historial más robusto
+HISTSIZE=10000
+HISTFILESIZE=20000
+HISTCONTROL=ignoredups
+HISTIGNORE="ls:cd:exit"
+shopt -s histappend
+
+# ------------------------------------------------------------
+# PATH local
+# ------------------------------------------------------------
+
+export PATH="$HOME/.local/bin:$PATH"
+
+export ANDROID_HOME="$HOME/Android/sdk"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export PATH="$ANDROID_HOME/platform-tools:$PATH"
+export PATH="/home/siryefers/flutter/3.44.8/bin:$PATH"
+
+. "$HOME/.local/bin/env"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+export PATH="/opt/nvim-linux-x86_64/bin:$PATH"
+
+# Copiar contenido de un archivo directo al portapapeles
+copy() {
+    if [ $# -eq 0 ]; then
+        echo "Uso: copy archivo1 [archivo2 ...]"
+        return 1
+    fi
+
+    for file in "$@"; do
+        if [ ! -f "$file" ]; then
+            echo "Archivo no encontrado: $file" >&2
+            return 1
+        fi
+    done
+
+    {
+        for file in "$@"; do
+            printf '\n\n===== %s =====\n' "$file"
+            cat -- "$file"
+        done
+    } | python3 -c '
+import sys, base64
+data = sys.stdin.buffer.read()
+encoded = base64.b64encode(data).decode()
+print("\033]52;c;" + encoded + "\a", end="")
+'
+}
+
+```
+
+#### 0.2 .bashrc Termux
+
+```bash
+# ============================================================
+# CONFIGURACIÓN BASH - TERMUX
+# ============================================================
+
+# ============================================================
+# PATH
+# ============================================================
+
+# Termux
+export PATH="$PREFIX/bin:$PATH"
+
+# Ejecutables instalados localmente (Neovim, uv, etc.)
+export PATH="$HOME/.local/bin:$PATH"
+
+# Flutter (si está instalado)
+if [ -d "$HOME/flutter/bin" ]; then
+    export PATH="$HOME/flutter/bin:$PATH"
+fi
+
+# Android SDK (si está instalado)
+if [ -d "$HOME/Android/Sdk" ]; then
+    export ANDROID_HOME="$HOME/Android/Sdk"
+    export ANDROID_SDK_ROOT="$ANDROID_HOME"
+    export PATH="$ANDROID_HOME/platform-tools:$PATH"
+fi
+
+# ============================================================
+# EDITOR
+# ============================================================
+
+export EDITOR="$HOME/.local/bin/nvim"
+export VISUAL="$EDITOR"
+
+# ============================================================
+# COLORES
+# ============================================================
+
+RED='\[\033[0;31m\]'
+GREEN='\[\033[0;32m\]'
+LIGHT_BLUE='\[\033[1;34m\]'
+YELLOW='\[\033[0;33m\]'
+CYAN='\[\033[0;36m\]'
+RESET='\[\033[0m\]'
+
+# ============================================================
+# PROMPT
+# ============================================================
+
+parse_git_branch() {
+    git branch --show-current 2>/dev/null
+}
+
+PS1="${YELLOW}[\$(date +'%Y-%m-%d %H:%M:%S')]${RESET} ${GREEN}\u${RESET}@${LIGHT_BLUE}\h${RESET}: ${CYAN}\w${RESET}\n(\$(parse_git_branch))-> "
+
+# ============================================================
+# ALIAS
+# ============================================================
+
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias ll='ls -la'
+alias cls='clear'
+
+# ============================================================
+# HISTORIAL
+# ============================================================
+
+HISTSIZE=10000
+HISTFILESIZE=20000
+HISTCONTROL=ignoredups
+HISTIGNORE="ls:cd:exit"
+
+shopt -s histappend
+
+# ============================================================
+# TERMINAL
+# ============================================================
+
+set -o vi
+
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+
+# ============================================================
+# NVM (si está instalado)
+# ============================================================
+
+export NVM_DIR="$HOME/.nvm"
+
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+    . "$NVM_DIR/nvm.sh"
+fi
+
+if [ -s "$NVM_DIR/bash_completion" ]; then
+    . "$NVM_DIR/bash_completion"
+fi
+
+# ============================================================
+# COPIAR ARCHIVOS AL PORTAPAPELES (OSC 52)
+# ============================================================
+
+copy() {
+    if [ "$#" -eq 0 ]; then
+        echo "Uso: copy archivo1 [archivo2 ...]"
+        return 1
+    fi
+
+    for file in "$@"; do
+        if [ ! -f "$file" ]; then
+            echo "Archivo no encontrado: $file" >&2
+            return 1
+        fi
+    done
+
+    {
+        for file in "$@"; do
+            printf '\n\n===== %s =====\n' "$file"
+            cat -- "$file"
+        done
+    } | python -c '
+import sys
+import base64
+
+data = sys.stdin.buffer.read()
+encoded = base64.b64encode(data).decode("ascii")
+
+sys.stdout.write("\033]52;c;" + encoded + "\a")
+sys.stdout.flush()
+'
+}
+
+```
+
+#### 0.3 tmux Debian
+
+```bash
+set -g mouse off
+set -g set-clipboard on
+set -g allow-passthrough on
+
+
+```
+
+#### 0.4 tmux Termux
+
+```bash
+set -g mouse off
+set -g set-clipboard on
+set -g allow-passthrough on
+
+```
 
 > Guía de instalación para CachyOS, Debian y Termux.
 >
@@ -462,4 +710,5 @@ No subir las carpetas de caché, datos locales, entornos virtuales ni credencial
 **Gestor de configuración:** Git + GitHub.
 
 **Editor:** Neovim + LazyVim.
+
 # nvim_2026

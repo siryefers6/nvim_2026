@@ -21,5 +21,15 @@ vim.opt.splitbelow = true
 -- Transparencia del menú de autocompletado
 vim.opt.pumblend = 10
 
--- Copiar al portapapeles
-vim.opt.clipboard = "unnamedplus"
+-- Mantener el portapapeles interno de Neovim
+vim.opt.clipboard = ""
+
+-- Copiar automáticamente los textos seleccionados con y
+-- al portapapeles externo mediante OSC 52
+vim.api.nvim_create_autocmd("TextYankPost", {
+  callback = function()
+    if vim.v.event.operator == "y" then
+      require("vim.ui.clipboard.osc52").copy("+")(vim.v.event.regcontents, vim.v.event.regtype)
+    end
+  end,
+})
